@@ -118,7 +118,7 @@ class PortainerAPI:
             'endpointId': self.get_endpoint_id(self.endpoint_name)
         }
         resp = self.post_to_api(path, payload, params=params)
-        return resp.json()
+        return resp
 
     def update_stack(self, stack_id, file_content):
         path = 'stacks/{}'.format(stack_id)
@@ -130,7 +130,7 @@ class PortainerAPI:
             'endpointId': self.get_endpoint_id(self.endpoint_name)
         }
         resp = self.put_to_api(path, payload, params=params)
-        return resp.json()
+        return resp
 
 
 def get_stack_contents(filename):
@@ -191,6 +191,8 @@ def main():
     portainer.set_docker_type(params['type'])
 
     resp = portainer.deploy_stack(params['stack_name'], stack_contents)
+    print(resp.status_code)
+    print(resp.text)
     print(json.dumps(resp, indent=2))
     if resp.status_code == 200:
         exit(0)
