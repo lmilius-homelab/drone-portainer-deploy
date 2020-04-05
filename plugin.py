@@ -9,7 +9,7 @@ class PortainerAPI:
     def __init__(self, url, username, password, endpoint_name, ssl_verify=True):
         if not url.endswith('/'):
             url = url + '/'
-        self.base_api_url = url + '{}'
+        self.base_api_url = url + 'api/{}'
         self.username = username
         self.password = password
         self.ssl_verify = ssl_verify
