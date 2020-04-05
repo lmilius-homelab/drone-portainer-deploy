@@ -6,17 +6,17 @@ import os
 
 class PortainerAPI:
 
-    def __init__(self, url, username, password, endpoint_name):
+    def __init__(self, url, username, password, endpoint_name, ssl_verify=True):
         if not url.endswith('/'):
             url = url + '/'
         self.base_api_url = url + '{}'
         self.username = username
         self.password = password
+        self.ssl_verify = ssl_verify
         self.auth_headers = self.get_auth_headers()
         self.endpoint_name = endpoint_name
         self.env = {}
         self.docker_type = 1
-        self.ssl_verify = True
 
     def get_from_api(self, path):
         url = self.base_api_url.format(path)
@@ -183,12 +183,12 @@ def main():
     portainer = PortainerAPI(params['url'],
                              params['username'],
                              params['password'],
-                             params['endpoint'])
+                             params['endpoint'],
+                             params['ssl_verify'])
 
     stack_contents = get_stack_contents(params['stack_file'])
     portainer.set_env(params['env'])
     portainer.set_docker_type(params['type'])
-    portainer.set_ssl_verify(params['ssl_verify'])
 
     resp = portainer.deploy_stack(params['stack_name'], stack_contents)
     print(json.dumps(resp, indent=2))
