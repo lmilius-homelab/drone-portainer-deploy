@@ -8,7 +8,7 @@ steps:
   settings:
     username:
       from_secret: docker_hub_username
-    password:
+    auth:
       from_secret: docker_hub_password
     repo: lmilius-homelab/drone-portainer-deploy
     auto_tag: true
