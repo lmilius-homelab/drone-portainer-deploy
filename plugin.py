@@ -7,36 +7,39 @@ import os
 class PortainerAPI:
 
     def __init__(self, url, username, password, endpoint_name):
-        self.base_api_url = url
+        if not url.endswith('/'):
+            url = url + '/'
+        self.base_api_url = url + '{}'
         self.username = username
         self.password = password
         self.auth_headers = self.get_auth_headers()
         self.endpoint_name = endpoint_name
         self.env = {}
         self.docker_type = 1
+        self.ssl_verify = True
 
     def get_from_api(self, path):
         url = self.base_api_url.format(path)
-        return requests.get(url, headers=self.auth_headers, verify=False)
+        return requests.get(url, headers=self.auth_headers, verify=self.ssl_verify)
 
     def post_to_api(self, path, payload, params=None):
         url = self.base_api_url.format(path)
-        return requests.post(url, headers=self.auth_headers, json=payload, params=params, verify=False)
+        return requests.post(url, headers=self.auth_headers, json=payload, params=params, verify=self.ssl_verify)
 
     def put_to_api(self, path, paylod, params=None):
         url = self.base_api_url.format(path)
-        return requests.put(url, headers=self.auth_headers, json=paylod, params=params, verify=False)
+        return requests.put(url, headers=self.auth_headers, json=paylod, params=params, verify=self.ssl_verify)
 
     def delete_to_api(self, path, params=None):
         url = self.base_api_url.format(path)
-        return requests.delete(url, params=params, headers=self.auth_headers, verify=False)
+        return requests.delete(url, params=params, headers=self.auth_headers, verify=self.ssl_verify)
 
     def get_auth_headers(self):
         payload = {
             'username': self.username,
             'password': self.password
         }
-        resp = requests.post(self.base_api_url.format('auth'), json=payload, verify=False)
+        resp = requests.post(self.base_api_url.format('auth'), json=payload, verify=self.ssl_verify)
         auth_token = resp.json()['jwt']
         headers = {
             'Authorization': f'Bearer {auth_token}'
@@ -83,11 +86,14 @@ class PortainerAPI:
         swarm_id = swarm_resp.json()['ID']
         return swarm_id
 
-    def set_env(self, env):
+    def set_env(self, env: dict):
         self.env = env
 
-    def set_docker_type(self, type):
-        self.docker_type = type
+    def set_docker_type(self, docker_type: int):
+        self.docker_type = docker_type
+
+    def set_ssl_verify(self, ssl_verify: bool):
+        self.ssl_verify = ssl_verify
 
     def deploy_stack(self, name, file_content):
         stack_id = self.get_stack_id(name)
@@ -165,8 +171,9 @@ def get_parameters():
     params['stack_file'] = os.environ.get('PLUGIN_STACK_FILE', 'docker-compose.yml')
     params['endpoint'] = os.environ.get('PLUGIN_ENDPOINT', 'primary')
     params['env'] = parse_environment_vars(os.environ.get('PLUGIN_ENVIRONMENT', "[]"))
-    type = os.environ.get('PLUGIN_TYPE', 'compose')
-    params['type'] = 1 if type == 'stack' else 2
+    docker_type = os.environ.get('PLUGIN_TYPE', 'compose')
+    params['type'] = 1 if docker_type == 'stack' else 2
+    params['ssl_verify'] = os.environ.get('PLUGIN_SSL_VERIFY', 'true') == 'true'
 
     return params
 
@@ -181,6 +188,7 @@ def main():
     stack_contents = get_stack_contents(params['stack_file'])
     portainer.set_env(params['env'])
     portainer.set_docker_type(params['type'])
+    portainer.set_ssl_verify(params['ssl_verify'])
 
     resp = portainer.deploy_stack(params['stack_name'], stack_contents)
     print(json.dumps(resp, indent=2))
