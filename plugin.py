@@ -133,6 +133,7 @@ class PortainerAPI:
             'method': method,
             'endpointId': self.get_endpoint_id(self.endpoint_name)
         }
+        print(payload['SwarmID'])
         resp = self.post_to_api(path, payload, params=params)
         return resp
 
