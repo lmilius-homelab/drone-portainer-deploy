@@ -127,7 +127,7 @@ class PortainerAPI:
             'Env': self.env
         }
         if self.docker_type == 1:
-            payload['SwarmID'] = self.get_swarm_identity(self.endpoint_name),
+            payload['SwarmID'] = self.get_swarm_identity(self.endpoint_name)
         params = {
             'type': self.docker_type,
             'method': method,
