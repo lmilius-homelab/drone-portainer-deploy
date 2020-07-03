@@ -213,7 +213,6 @@ def main():
     resp = portainer.deploy_stack(params['stack_name'], stack_contents)
     print(resp.status_code)
     print(resp.text)
-    print(json.dumps(resp, indent=2))
     if resp.status_code == 200:
         exit(0)
     else:
